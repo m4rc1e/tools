@@ -62,12 +62,12 @@ def getByte1(ttfont):
   return ttfont['OS/2'].fsSelection & 255
 
 
-def printInfo(fonts, print_csv=False):
+def printInfo(filenames, print_csv=False):
   rows = []
   headers = ['filename', 'fsSelection']
-  for font in fonts:
-    ttfont = ttLib.TTFont(font)
-    row = [os.path.basename(font)]
+  for filename in filenames:
+    ttfont = ttLib.TTFont(filename)
+    row = [os.path.basename(filename)]
     row.append(('{:#010b} '
                 '{:#010b}'
                 '').format(getByte2(ttfont),
@@ -85,34 +85,34 @@ def printInfo(fonts, print_csv=False):
   else:
     print(tabulate.tabulate(rows, headers, tablefmt="pipe"))
 
-def _style(font):
-  filename_base = font.split('.')[0]
+def _style(filename):
+  filename_base = filename.split('.')[0]
   return filename_base.split('-')[-1]
 
-def _familyname(font):
-  filename_base = font.split('.')[0]
+def _familyname(filename):
+  filename_base = filename.split('.')[0]
   names = filename_base.split('-')
   names.pop()
   return '-'.join(names)
 
-def is_italic(font):
-  return 'Italic' in _style(font)
+def is_italic(filename):
+  return 'Italic' in _style(filename)
 
-def is_regular(font):
-  style = _style(font)
+def is_regular(filename):
+  style = _style(filename)
   return ("Regular" in style or
           (style in STYLE_NAMES and
            style not in RIBBI_STYLE_NAMES and
            "Italic" not in style))
 
-def is_bold(font):
-  return _style(font) in ["Bold", "BoldItalic"]
+def is_bold(filename):
+  return _style(filename) in ["Bold", "BoldItalic"]
 
-def is_canonical(font):
-  if '-' not in font:
+def is_canonical(filename):
+  if '-' not in filename:
     return False
   else:
-    style = _style(font)
+    style = _style(filename)
     for valid in STYLE_NAMES:
       valid = ''.join(valid.split(' '))
       if style == valid:
@@ -127,23 +127,25 @@ def main():
     for font in args.font:
       ttfont = ttLib.TTFont(font)
 
-      if not is_canonical(font):
-        print("Font filename is not canonical: '{}'".format(font))
+
+      filename = os.path.basename(font)
+      if not is_canonical(filename):
+        print("Font filename is not canonical: '{}'".format(filename))
         exit(-1)
 
       initial_value = ttfont['OS/2'].fsSelection
 
-      if is_regular(font):
+      if is_regular(filename):
         ttfont['OS/2'].fsSelection |= 0b1000000
       else:
         ttfont['OS/2'].fsSelection &= ~0b1000000
 
-      if is_bold(font):
+      if is_bold(filename):
         ttfont['OS/2'].fsSelection |= 0b100000
       else:
         ttfont['OS/2'].fsSelection &= ~0b100000
 
-      if is_italic(font):
+      if is_italic(filename):
         ttfont['OS/2'].fsSelection |= 0b1
       else:
         ttfont['OS/2'].fsSelection &= ~0b1
