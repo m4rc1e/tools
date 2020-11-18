@@ -1,3 +1,5 @@
+|GitHub Actions Build Status| |Python Versions| |PyPI Version|
+
 # Google Fonts Tools
 
 This project contains tools used for working with the Google Fonts collection, plus **Google Fonts Glyph Set Documentation** in the [/encodings](https://github.com/googlefonts/gftools/tree/master/Lib/gftools/encodings) subdirectory. While these tools are primarily intended for contributors to the Google Fonts project, anyone who works with fonts could find them useful.
@@ -83,3 +85,16 @@ key = your-newly-generated-googlefonts-api-key
 * https://github.com/google/google-apputils
 * https://github.com/google/protobuf
 * https://github.com/behdad/fonttools
+
+
+.. _virtualenv: https://virtualenv.pypa.io
+.. _venv: https://docs.python.org/3/library/venv.html
+.. _pip: https://pip.pypa.io
+.. _pip documentation: https://pip.readthedocs.io/en/stable/user_guide/#requirements-files
+.. _PyPI: https://pypi.org/project/fontmake
+.. _Github releases: https://github.com/googlefonts/gftools/releases
+.. _pipx: https://github.com/pipxproject/pipx
+.. |GitHub Actions Build Status| image:: https://github.com/googlefonts/gftools/workflows/Test/badge.svg
+.. |Python Versions| image:: https://img.shields.io/badge/python-3.6-blue.svg
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/gftools.svg
+   :target: https://pypi.org/project/gftools/
