@@ -476,6 +476,11 @@ class HtmlTemplater(object):
         # subclasses and then screenshot these instead
         raise NotImplementedError
 
+    def copytree(src, dst):
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)
+
 
 class HtmlProof(HtmlTemplater):
     def __init__(
@@ -513,7 +518,7 @@ class HtmlProof(HtmlTemplater):
                 src_imgs = os.path.join(temp_html.out, "img")
                 dir_name = "-".join(s._style.replace(" ", "") for s in group)
                 dst_imgs = os.path.join(self.out, "img", dir_name)
-                shutil.copytree(src_imgs, dst_imgs, dirs_exist_ok=True)
+                self.copytree(src_imgs, dst_imgs)
 
 
 class HtmlDiff(HtmlTemplater):
@@ -639,7 +644,7 @@ class HtmlDiff(HtmlTemplater):
                 src_imgs = os.path.join(temp_html.out, "img")
                 dir_name = "-".join(s._style.replace(" ", "") for s in group)
                 dst_imgs = os.path.join(self.out, "img", dir_name)
-                shutil.copytree(src_imgs, dst_imgs, dirs_exist_ok=True)
+                self.copytree(src_imgs, dst_imgs)
 
 
 # Local server functions
