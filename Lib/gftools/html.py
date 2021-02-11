@@ -479,7 +479,8 @@ class HtmlTemplater(object):
 
 class HtmlProof(HtmlTemplater):
     def __init__(
-        self, fonts, out="out", template_dir=resource_filename("gftools", "templates")
+        self, fonts, out="out", template_dir=resource_filename("gftools", "templates"),
+        user_text=None
     ):
         """Proof a single family."""
         super().__init__(out, template_dir=template_dir)
@@ -495,6 +496,7 @@ class HtmlProof(HtmlTemplater):
         self.too_big_for_browserstack = len(self.css_font_classes) > 4
 
         self.sample_text = " ".join(font_sample_text(self.ttFonts[0]))
+        self.user_text = user_text
         # TODO to collect unencoded glyphs, we need to make a better version
         # of hbinput
         self.glyphs = get_encoded_glyphs(self.ttFonts[0])
@@ -554,6 +556,7 @@ class HtmlDiff(HtmlTemplater):
         self.too_big_for_browserstack = len(self.css_font_classes_before) > 4
 
         self.sample_text = " ".join(font_sample_text(self.ttFonts_before[0]))
+        self.kern_string = "AZ AX AY AE"
         self.glyphs = get_encoded_glyphs(self.ttFonts_before[0])
 
     def _match_css_font_classes(self):

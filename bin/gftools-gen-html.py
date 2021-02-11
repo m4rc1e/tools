@@ -64,6 +64,11 @@ def main():
         help="HTML template directory. By default, gftools/templates is used.",
         default=resource_filename("gftools", "templates"),
     )
+    universal_options_parser.add_argument(
+        "--user-text",
+        default=None,
+        help="User suplied text files"
+    )
 
     proof_parser = subparsers.add_parser(
         "proof",
@@ -88,7 +93,11 @@ def main():
     args = parser.parse_args()
 
     if args.command == "proof":
-        html = HtmlProof(args.fonts, args.out, template_dir=args.template_dir)
+        if args.user_text:
+            user_text = open(args.user_text).read()
+        else:
+            user_text = None
+        html = HtmlProof(args.fonts, args.out, template_dir=args.template_dir, user_text=user_text)
 
     elif args.command == "diff":
         html = HtmlDiff(
