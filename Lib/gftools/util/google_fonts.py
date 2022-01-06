@@ -415,6 +415,11 @@ def SubsetsInFont(file_path, min_pct, ext_min_pct=None):
   return results
 
 
+def get_codepoint_from_line(line):
+  u = line.split()[0]
+  return int(u, 16)
+
+
 def FamilyName(fontname):
   """Attempts to build family name from font name.
 

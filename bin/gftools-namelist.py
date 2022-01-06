@@ -155,13 +155,13 @@ def _mkdir(path):
           raise exc
 
 
-def generate_filter_lists(filename):
+def generate_filter_lists(filename, out=None):
     # 'GF-{script}-rest.nam' => {script}-rest
     basename = os.path.basename(filename).split('.', 1)[0].split('-', 2)[-1]
     filerListFileName = '{0}.txt'.format(basename)
     dirname =  os.path.dirname(filename)
-    nice_names_filename = os.path.join(dirname, 'filter lists', 'nice names', filerListFileName)
-    prod_names_filename = os.path.join(dirname, 'filter lists', 'uni names', filerListFileName)
+    nice_names_filename = os.path.join(out or dirname, 'filter lists', 'nice names', filerListFileName)
+    prod_names_filename = os.path.join(out or dirname, 'filter lists', 'uni names', filerListFileName)
 
     _mkdir(os.path.dirname(nice_names_filename))
     _mkdir(os.path.dirname(prod_names_filename))
@@ -218,7 +218,8 @@ def main(*args):
     if args[0] == 'reformat':
         reformat_namelist(args[1])
     elif args[0] == 'generate-filter-lists':
-        generate_filter_lists(args[1])
+        out = None if len(sys.argv) < 4 else sys.argv[3]
+        generate_filter_lists(args[1], out=out)
     else:
         namelist_from_font(args[0])
 
