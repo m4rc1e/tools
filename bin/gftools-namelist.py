@@ -197,7 +197,7 @@ def format_codepoint(codepoint):
 def namelist_from_font(file_name, out=None):
     if out is None:
         out = sys.stdout
-    excluded_chars = ["????", "SPACE", "NO-BREAK SPACE"]
+    excluded_chars = ["????"]
     font = TTFont(file_name)
     charcodes = set()
     for cmap in font["cmap"].tables:
