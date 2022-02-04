@@ -200,6 +200,15 @@ def fix_weight_class(ttFont):
             ttFont["OS/2"].usWeightClass = int(v)
             return ttFont["OS/2"].usWeightClass != old_weight_class
 
+    if 'fvar' in ttFont:
+        fvar = ttFont['fvar']
+        default_axis_values = {a.axisTag: a.defaultValue for a in fvar.axes}
+        v = default_axis_values.get('wght', None)
+
+        if v is not None:
+            ttFont["OS/2"].usWeightClass = int(v)
+            return ttFont["OS/2"].usWeightClass != old_weight_class
+
     stylename = font_stylename(ttFont)
     tokens = stylename.split()
     # Order WEIGHT_NAMES so longest names are first
@@ -887,4 +896,3 @@ class GaspFixer(FontFixer):
             print(self.font.get('gasp').gaspRange[65535])
         except IndexError:
             print('ER: {}: no index 65535'.format(self.path))
-
