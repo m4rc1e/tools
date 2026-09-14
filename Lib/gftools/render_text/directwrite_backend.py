@@ -59,12 +59,20 @@ def render_row(
 
     font = skia.Font(typeface, float(ppem))
     font.setSubpixel(True)
+    # ClearType: subpixel antialiasing, not just subpixel positioning.
+    font.setEdging(skia.Font.Edging.kSubpixelAntiAlias)
 
     blob = skia.TextBlob.MakeFromString(text, font)
     bounds = blob.bounds()
     width = max(int(bounds.width()) + PADDING * 2, 1)
 
-    surface = skia.Surface(width, target_height)
+    # Without SurfaceProps declaring the pixel geometry, Skia quietly
+    # downgrades LCD (subpixel) text to grayscale antialiasing.
+    surface = skia.Surface.MakeRaster(
+        skia.ImageInfo.MakeN32Premul(width, target_height),
+        0,
+        skia.SurfaceProps(0, skia.PixelGeometry.kRGB_H_PixelGeometry),
+    )
     with surface as canvas:
         canvas.clear(skia.ColorWHITE)
         paint = skia.Paint()
