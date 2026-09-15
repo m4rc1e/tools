@@ -46,7 +46,7 @@ from gftools.render_text import (
 )
 
 
-BACKENDS = ("coretext", "directwrite", "freetype")
+BACKENDS = ("coretext", "directwrite", "freetype", "gdi")
 
 
 def main(args=None):

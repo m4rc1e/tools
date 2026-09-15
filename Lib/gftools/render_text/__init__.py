@@ -181,6 +181,7 @@ _BACKEND_DISPLAY = {
     "coretext": "CoreText",
     "directwrite": "DirectWrite",
     "freetype": "FreeType",
+    "gdi": "GDI ClearType",
 }
 
 
@@ -208,6 +209,10 @@ def _load_backend(name: str):
         from . import directwrite_backend
 
         return directwrite_backend.render_row
+    if name == "gdi":
+        from . import gdi_backend
+
+        return gdi_backend.render_row
     raise ValueError(f"unknown backend {name!r}")
 
 
