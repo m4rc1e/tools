@@ -26,10 +26,11 @@ DirectWrite on Windows, FreeType on Linux). Override with ``--backend``.
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 from pathlib import Path
 
 from gftools.render_text import (
+    DEFAULT_PPEMS,
     default_backend,
     diff_image,
     is_variable,
@@ -40,6 +41,7 @@ from gftools.render_text import (
     output_path_for_instance,
     output_subdir_for_instance,
     pad_to_match,
+    parse_ppems,
     parse_variations,
     render_waterfall,
     save_animation,
@@ -47,6 +49,27 @@ from gftools.render_text import (
 
 
 BACKENDS = ("coretext", "directwrite", "freetype", "gdi")
+
+
+def _ppems_arg(spec: str) -> list[int]:
+    try:
+        return parse_ppems(spec)
+    except ValueError as e:
+        raise ArgumentTypeError(str(e)) from None
+
+
+def _add_ppems_arg(parser: ArgumentParser) -> None:
+    parser.add_argument(
+        "--ppems",
+        type=_ppems_arg,
+        default=DEFAULT_PPEMS,
+        help=(
+            'Ppem sizes for the waterfall, e.g. "8-24" or "9,11,13-16". '
+            "Ranges are inclusive. Default: "
+            + ",".join(str(p) for p in DEFAULT_PPEMS)
+            + "."
+        ),
+    )
 
 
 def main(args=None):
@@ -80,6 +103,7 @@ def main(args=None):
         default=None,
         help="Rendering backend. Defaults to the platform-native backend.",
     )
+    _add_ppems_arg(proof)
     proof.set_defaults(func=_run_proof)
 
     diff = subs.add_parser(
@@ -110,6 +134,7 @@ def main(args=None):
         default=None,
         help="Rendering backend. Defaults to the platform-native backend.",
     )
+    _add_ppems_arg(diff)
     diff.set_defaults(func=_run_diff)
 
     opts = parser.parse_args(args)
@@ -119,23 +144,27 @@ def main(args=None):
 def _run_proof(opts) -> None:
     backend = opts.backend or default_backend()
     if opts.all:
-        _render_all(opts.font, opts.text, opts.output, backend)
+        _render_all(opts.font, opts.text, opts.output, backend, opts.ppems)
         return
     variations = parse_variations(opts.variations) if opts.variations else None
     out = output_path_for(opts.font, variations=variations, output=opts.output)
-    img = render_waterfall(opts.font, opts.text, variations=variations, backend=backend)
+    img = render_waterfall(
+        opts.font, opts.text, ppems=opts.ppems, variations=variations, backend=backend
+    )
     img.save(out)
     print(out)
 
 
-def _render_all(font: Path, text: str, output: str | None, backend: str) -> None:
+def _render_all(
+    font: Path, text: str, output: str | None, backend: str, ppems: list[int]
+) -> None:
     if not is_variable(font):
         print(
             f"warning: {font} is a static font — rendering default style only.",
             file=sys.stderr,
         )
         out = output_path_for(font, output=output)
-        img = render_waterfall(font, text, backend=backend)
+        img = render_waterfall(font, text, ppems=ppems, backend=backend)
         img.save(out)
         print(out)
         return
@@ -144,7 +173,9 @@ def _render_all(font: Path, text: str, output: str | None, backend: str) -> None
     out_dir.mkdir(parents=True, exist_ok=True)
     for instance_name, location in iter_fvar_instances(font):
         out = output_path_for_instance(font, instance_name, out_dir)
-        img = render_waterfall(font, text, variations=location, backend=backend)
+        img = render_waterfall(
+            font, text, ppems=ppems, variations=location, backend=backend
+        )
         img.save(out)
         print(out)
 
@@ -165,12 +196,24 @@ def _run_diff(opts) -> None:
             subdir = output_subdir_for_instance(out_dir, instance_name)
             subdir.mkdir(parents=True, exist_ok=True)
             _emit_diff_bundle(
-                opts.before, opts.after, opts.text, location, backend, subdir
+                opts.before,
+                opts.after,
+                opts.text,
+                location,
+                backend,
+                subdir,
+                opts.ppems,
             )
     else:
         variations = parse_variations(opts.variations) if opts.variations else None
         _emit_diff_bundle(
-            opts.before, opts.after, opts.text, variations, backend, out_dir
+            opts.before,
+            opts.after,
+            opts.text,
+            variations,
+            backend,
+            out_dir,
+            opts.ppems,
         )
 
 
@@ -181,12 +224,13 @@ def _emit_diff_bundle(
     variations: dict | None,
     backend: str,
     out_dir: Path,
+    ppems: list[int],
 ) -> None:
     before_img = render_waterfall(
-        before_path, text, variations=variations, backend=backend
+        before_path, text, ppems=ppems, variations=variations, backend=backend
     )
     after_img = render_waterfall(
-        after_path, text, variations=variations, backend=backend
+        after_path, text, ppems=ppems, variations=variations, backend=backend
     )
     before_pad, after_pad = pad_to_match([before_img, after_img])
     diff_img = diff_image(before_pad, after_pad)

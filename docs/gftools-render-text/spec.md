@@ -19,8 +19,8 @@ The tool has two subcommands:
 ## Synopsis
 
 ```
-gftools render-text proof FONT TEXT [-o OUTPUT] [--variations AXES | --all] [--backend BACKEND]
-gftools render-text diff  BEFORE AFTER TEXT [-o PREFIX] [--variations AXES] [--backend BACKEND]
+gftools render-text proof FONT TEXT [-o OUTPUT] [--variations AXES | --all] [--backend BACKEND] [--ppems PPEMS]
+gftools render-text diff  BEFORE AFTER TEXT [-o PREFIX] [--variations AXES] [--backend BACKEND] [--ppems PPEMS]
 ```
 
 ## Examples
@@ -30,6 +30,7 @@ gftools render-text proof Roboto-Regular.ttf "The quick brown fox jumps"
 gftools render-text proof Roboto[wght].ttf "Hamburgefonstiv" --variations wght=400,wdth=75
 gftools render-text proof Roboto[wght].ttf "Hamburgefonstiv" --all
 gftools render-text proof Roboto-Regular.ttf "..." --backend freetype
+gftools render-text proof Roboto-Regular.ttf "..." --ppems 9-24,36
 
 gftools render-text diff Roboto-old.ttf Roboto-new.ttf "Hamburgefonstiv"
 gftools render-text diff Roboto-old.ttf Roboto-new.ttf "..." --variations wght=700
@@ -38,7 +39,7 @@ gftools render-text diff Roboto-old.ttf Roboto-new.ttf "..." --variations wght=7
 ## `proof` subcommand
 
 Default output is a waterfall PNG containing the string rendered at the
-following ppem sizes, stacked vertically:
+following ppem sizes, stacked vertically (override with `--ppems`):
 
 ```
 8, 10, 12, 14, 16, 20, 24, 36
@@ -171,6 +172,19 @@ from the host platform:
 The override is primarily for (a) developing/testing the FreeType path on
 a Mac, and (b) letting CI assert which backend ran rather than inferring
 from `runs-on`.
+
+### `--ppems PPEMS`
+
+Set the ppem sizes of the waterfall rows. The value is a comma-separated
+list of sizes and inclusive `start-end` ranges:
+
+```
+--ppems 8-24          # 8, 9, 10, ..., 24
+--ppems 9,11,13-16,36 # 9, 11, 13, 14, 15, 16, 36
+```
+
+Duplicates are removed and rows are always drawn from smallest to largest.
+Default: `8,10,12,14,16,20,24,36`.
 
 ## Cross-backend dimensions
 

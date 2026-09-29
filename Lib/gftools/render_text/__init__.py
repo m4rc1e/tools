@@ -54,6 +54,34 @@ def parse_variations(spec: str) -> dict[str, float]:
     return result
 
 
+def parse_ppems(spec: str) -> list[int]:
+    """Parse ``8-16,20,24`` into ``[8, 9, ..., 16, 20, 24]``.
+
+    Each comma-separated token is either a single ppem or an inclusive
+    ``start-end`` range. Duplicates are removed; the result is sorted.
+    """
+    result: set[int] = set()
+    for token in spec.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        try:
+            if "-" in token:
+                start, end = (int(v) for v in token.split("-", 1))
+                if start > end:
+                    raise ValueError
+                result.update(range(start, end + 1))
+            else:
+                result.add(int(token))
+        except ValueError:
+            raise ValueError(
+                f"ppem token {token!r} must be an integer or a 'start-end' range"
+            ) from None
+    if not result or min(result) < 1:
+        raise ValueError(f"ppems {spec!r} must contain positive integers")
+    return sorted(result)
+
+
 def is_variable(font_path: Path) -> bool:
     with TTFont(font_path) as font:
         return "fvar" in font
